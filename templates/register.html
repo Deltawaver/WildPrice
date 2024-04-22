@@ -1,8 +1,8 @@
 {% extends "base.html" %}
   
   {% block content %}
-  <h1>Регистрация</h1>
-  <form action="" method="post">
+  <h1 style="text-align: center;">Регистрация</h1>
+  <form action="" method="post" class='login-container'>
     {{ form.hidden_tag() }}
     <p>
       {{ form.email.label }}<br>
@@ -46,7 +46,7 @@
     {{ message }}
   </form>
   
-  <p>
+  <p style="text-align: center;">
     Уже зарегистрированы? <a href="login">Войти</a>
   </p>
   {% endblock %}
