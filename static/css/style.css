@@ -1,24 +1,24 @@
 .btn-container { /* Добавьте класс к контейнеру кнопок */
-    display: grid;
-    justify-content: end; /* Выравнивание по правому краю */
-  }
+  display: grid;
+  justify-content: end; /* Выравнивание по правому краю */
+}
 /* Set navbar background color */
 .navbar {
-  background-color: #BC3D96; /* Adjust color as needed */
+background-color: #BC3D96; /* Adjust color as needed */
 }
 
 /* Set navbar text color */
 .navbar-brand,
 .navbar-nav .nav-link {
-  color: white; /* Adjust text color as needed */
+color: white; /* Adjust text color as needed */
 }
 
 /* Position navbar absolutely */
 .navbar {
-  position: absolute; /* Position relative to parent */
-  top: 0; /* Position at the top of the page */
-  left: 0; /* Position at the left edge of the page */
-  width: 100%; /* Span the entire width of the page */
+position: absolute; /* Position relative to parent */
+top: 0; /* Position at the top of the page */
+left: 0; /* Position at the left edge of the page */
+width: 100%; /* Span the entire width of the page */
 }
 
 /* Prevent text wrapping in navbar */
@@ -26,6 +26,6 @@
 
 /* Add spacing between navbar and content */
 .container {
-  margin-top: 50px; /* Adjust spacing as needed */
+margin-top: 100px; /* Adjust spacing as needed */
 }
 

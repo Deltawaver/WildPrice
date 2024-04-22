@@ -44,7 +44,7 @@ def load_user(user_id):
 @app.route('/')
 @app.route('/index')
 def index():  # Renamed from login()
-    return render_template('base.html', title='Wildprice', get_info=get_info, Database=Database)
+    return render_template('main_content.html', title='Wildprice', get_info=get_info, Database=Database)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -101,6 +101,8 @@ def add_to_favourites(product_id):
 def logout():
     logout_user()
     return redirect("/")
+
+
 
 
 if __name__ == '__main__':
