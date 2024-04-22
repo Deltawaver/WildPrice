@@ -1,11 +1,11 @@
 import json
 
-from flask import Flask
+from flask import Flask, Blueprint
 from sqlalchemy import create_engine, Column, Integer, Float, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-app = Flask(__name__)
+app = Blueprint('api', __name__, url_prefix='/api')
 Base = declarative_base()
 
 
@@ -31,10 +31,10 @@ class Database:
         return self.Session()
 
 
-db = Database('parser/products.db')  # Создаем экземпляр Database для работы с базой данных
+db = Database('db/products.db')  # Создаем экземпляр Database для работы с базой данных
 
 
-@app.route('/api/id/<int:product_id>', methods=['GET'])
+@app.route('/id/<int:product_id>', methods=['GET'])
 def get_product_info(product_id):
     # Обработчик GET-запроса для получения информации о продукте по его ID
     session = db.get_session()  # Получаем новую сессию SQLAlchemy
@@ -48,7 +48,7 @@ def get_product_info(product_id):
         return json.dumps({'error': 'Product not found'}), 404
 
 
-@app.route('/api/list', methods=['GET'])
+@app.route('/list', methods=['GET'])
 def get_product_list():
     # Обработчик GET-запроса для получения списка всех продуктов
     session = db.get_session()  # Получаем новую сессию SQLAlchemy

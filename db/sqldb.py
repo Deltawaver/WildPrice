@@ -50,6 +50,10 @@ class Database:
         products = self.session.query(Product).filter(Product.name == name).all()
         return [product.price for product in products] if products else None
 
+    def get_all_product_ids(self):
+        product_ids = [product.id for product in self.session.query(Product.id).all()]
+        return product_ids
+
     def delete_product_by_id(self, id):
         try:
             # Находим продукт по ID

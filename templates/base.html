@@ -1,33 +1,66 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-          crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
-    <title>{{title}}</title>
+
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
+    <title>{{title}}</title>
 </head>
 <body>
 <header>
-    <nav class="navbar navbar-light" style="background-color: #BC3D96;">
-        <a class="navbar-brand" href="/"><h1 style="color: white;">WildPrice</h1></a>
+    <nav class="navbar navbar-light" style="background-color: #BC3D96;">
+        <a class="navbar-brand" href="/"><h1 style="color: white;">WildPrice</h1></a>
         {% if current_user.is_authenticated %}
-            <a class="navbar-brand" style="color: white;" href="/logout">{{ current_user.name }}</a>
+        <a class="navbar-brand" style="color: white;" href="/logout">{{ current_user.name }}</a>
         {% else %}
-            <p>
-                <a class="btn btn-light ml-auto" href="/register">Зарегистрироваться</a>
-                <a class="btn btn-light ml-auto" href="/login">Войти</a>
-            </p>
+        <p>
+            <a class="btn btn-light ml-auto" href="/register">Зарегистрироваться</a>
+            <a class="btn btn-light ml-auto" href="/login">Войти</a>
+        </p>
         {% endif %}
     </nav>
 </header>
+
+<!-- Создаем экземпляр Database -->
+{% set products_db = Database("db/products.db") %}
 <main role="main" class="container">
-    {% block content %}
-    
-    {% endblock %}
+    {% block content %}
+
+    <div class="row">
+        {% for product_id in products_db.get_all_product_ids() %}
+        <!-- Вызываем функцию get_info для получения информации о товаре -->
+        {% set product = get_info(product_id) %}
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <img src="{{ product.image_link }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">ID: {{ product.id }}</p>
+                    <p class="card-text">Цена: {{ product.salePriceU|int }} руб.</p>
+                    <p class="card-text">Скидка: {{ ((product.priceU - product.salePriceU) / product.priceU *
+                        100)|round|int }}%</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <a href="https://www.wildberries.ru/catalog/{{ product.id }}/detail.aspx"
+                               class="btn btn-sm btn-outline-secondary">Подробнее</a>
+                            <a href="{{ url_for('add_to_favourites', product_id=product.id) }}"
+                               class="btn btn-sm btn-outline-secondary">Добавить в избранное</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endblock %}
 </main>
 </body>
 </html>

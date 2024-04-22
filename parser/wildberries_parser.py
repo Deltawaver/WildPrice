@@ -3,10 +3,23 @@ from time import sleep
 
 import requests
 
-from parser.model import DBItem
-from parser.sqldb import Database
+from parser.model import DBItem, Item
+from db.sqldb import Database
 
-db = Database("parser/products.db")
+db = Database("db/products.db")
+
+def get_info(art: int):
+    response = requests.get(
+        f'https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=-1257786&spp=29&nm={art}',
+    )
+
+    print(art, response.text)
+
+    item_info = Item.model_validate(response.json()["data"]["products"][0])
+    item_info.image_link = get_image_url(get_url(art))
+    item_info.discount = get_sale(item_info.priceU, item_info.salePriceU)
+
+    return item_info
 
 def get_latest_price(art : int) -> int:
     try:
@@ -55,17 +68,6 @@ def get_url(art: int) -> str:
 
     return url
 
-
-def get_item_id(url: str):
-    regex = "(?<=catalog/).+(?=/detail)"
-    item_id = re.search(regex, url)[0]
-    return item_id
-
-
-def get_card_url(url: str) -> str:
-    image_url = url + "info/ru/card.json"
-    return image_url
-
 def get_sale(previous_price, new_price) -> float:
     return (previous_price - new_price) / previous_price
 def get_image_url(url: str) -> str:
@@ -107,7 +109,7 @@ def category_parser(name, shard, query):
                         if latest_price:
                             sale = get_sale(latest_price, item_info.salePriceU)
 
-                            if sale >= 0.5:
+                            if sale >= 0.3:
                                 check = db.add(item_info.id, item_info.name, item_info.salePriceU)
 
                                 print("new sale")

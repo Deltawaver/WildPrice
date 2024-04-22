@@ -1,12 +1,24 @@
-from flask import Flask, url_for, request, render_template, redirect, make_response, session
+import os
+import sys
+
+from flask import Flask, render_template, redirect, url_for
+from flask_login import LoginManager, current_user
+from flask_login import login_user, login_required, logout_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, EmailField
+from wtforms import PasswordField, BooleanField, SubmitField, EmailField
 from wtforms.validators import DataRequired
+from api import app as api_app
+
 from data import db_session
 from data.users import User
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from db.sqldb import Database
 from forms.user import RegisterForm
-from flask_login import LoginManager
+from parser.wildberries_parser import get_info
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+# Добавляем путь к папке parser в sys.path
+sys.path.append(os.path.join(BASE_DIR, 'parser'))
 
 class LoginForm(FlaskForm):
     email = EmailField('Почта', validators=[DataRequired()])
@@ -14,20 +26,26 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Войти')
 
+
 app = Flask(__name__)
+app.register_blueprint(api_app)
+
 app.config['SECRET_KEY'] = 'omegaultra_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
+
 @app.route('/')
 @app.route('/index')
 def index():  # Renamed from login()
-    return render_template('base.html', title='Wildprice')
+    return render_template('base.html', title='Wildprice', get_info=get_info, Database=Database)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -42,6 +60,7 @@ def login():
                                message="Неправильный логин или пароль",
                                form=form)
     return render_template('login.html', title='Авторизация', form=form)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
@@ -66,6 +85,16 @@ def reqister():
         return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
+@app.route('/add_to_favourites/<int:product_id>', methods=['GET'])
+def add_to_favourites(product_id):
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).get(current_user.id)
+        user.add_to_favourites(product_id)
+        print(user.favourites)
+        db_sess.commit()
+        print(user.favourites)
+    return redirect(url_for('index'))
 
 @app.route('/logout')
 @login_required
@@ -73,6 +102,7 @@ def logout():
     logout_user()
     return redirect("/")
 
+
 if __name__ == '__main__':
     db_session.global_init("db/users.db")
-    app.run(port=8080, host='127.0.0.1')
+    app.run(debug=True)

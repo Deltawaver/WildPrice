@@ -1,5 +1,7 @@
 import datetime
 import sqlalchemy
+from sqlalchemy.dialects.postgresql import ARRAY
+
 from .db_session import SqlAlchemyBase
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -22,4 +24,11 @@ class User(SqlAlchemyBase, UserMixin):
         self.hashed_password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.hashed_password, password)    
+        return check_password_hash(self.hashed_password, password)
+
+    def add_to_favourites(self, product_id):
+        if self.favourites is None:
+            self.favourites = []
+        if product_id not in self.favourites:
+            self.favourites.extend([product_id])
+
