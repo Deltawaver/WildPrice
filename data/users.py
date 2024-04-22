@@ -31,5 +31,9 @@ class User(SqlAlchemyBase, UserMixin):
             self.favourites = ''
         if str(product_id) not in self.favourites:
             self.favourites += str(product_id) + ';'
+
+    def delete_from_favourites(self, product_id):
+        if str(product_id) in self.favourites:
+            self.favourites = self.favourites.replace(product_id + ";", "")
             
 

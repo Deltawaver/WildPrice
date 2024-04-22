@@ -1,12 +1,12 @@
-import re
 from time import sleep
 
 import requests
 
+from db.products_db import Database
 from parser.model import DBItem, Item
-from db.sqldb import Database
 
 db = Database("db/products.db")
+
 
 def get_info(art: int):
     response = requests.get(
@@ -21,7 +21,8 @@ def get_info(art: int):
 
     return item_info
 
-def get_latest_price(art : int) -> int:
+
+def get_latest_price(art: int) -> int:
     try:
         url = get_url(art) + "info/price-history.json"
         prices_json = requests.get(url).json()
@@ -32,6 +33,7 @@ def get_latest_price(art : int) -> int:
     except Exception as e:
         print(e.__class__.__name__, e)
         return None
+
 
 def get_url(art: int) -> str:
     art_str = str(art)
@@ -68,11 +70,15 @@ def get_url(art: int) -> str:
 
     return url
 
+
 def get_sale(previous_price, new_price) -> float:
     return (previous_price - new_price) / previous_price
+
+
 def get_image_url(url: str) -> str:
     image_url = url + "images/big/1.jpg"
     return image_url
+
 
 def category_parser(name, shard, query):
     print([name, shard, query], "начало работу")
@@ -105,19 +111,24 @@ def category_parser(name, shard, query):
                         item_info = DBItem.model_validate(product)
                         latest_price = get_latest_price(item_info.id)
 
-
                         if latest_price:
                             sale = get_sale(latest_price, item_info.salePriceU)
 
-                            if sale >= 0.3:
-                                check = db.add(item_info.id, item_info.name, item_info.salePriceU)
+                            if sale >= 0.4:
+                                check = db.add(item_info.id, item_info.name, item_info.salePriceU, latest_price,
+                                               get_image_url(get_url(item_info.id)))
 
                                 print("new sale")
 
                                 if check == 1:
                                     db.update_price(item_info.id, item_info.salePriceU)
+                                    db.update_previous_price(item_info.id, latest_price)
+
+                                return 2
                             elif db.get_price_from_id(item_info.id):
                                 db.delete_product_by_id(item_info.id)
+
+
 
                     page += 1
                 else:
@@ -130,4 +141,3 @@ def category_parser(name, shard, query):
     except Exception as e:
         print(e)
         category_parser(name, shard, query)
-
