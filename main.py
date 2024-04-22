@@ -1,7 +1,7 @@
 import os
 import sys
 
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_login import LoginManager, current_user
 from flask_login import login_user, login_required, logout_user
 from flask_wtf import FlaskForm
@@ -11,7 +11,7 @@ from api import app as api_app
 
 from data import db_session
 from data.users import User
-from db.sqldb import Database
+from db.products_db import Database
 from forms.user import RegisterForm
 from parser.wildberries_parser import get_info
 
@@ -44,7 +44,22 @@ def load_user(user_id):
 @app.route('/')
 @app.route('/index')
 def index():  # Renamed from login()
-    return render_template('main_content.html', title='Wildprice', get_info=get_info, Database=Database)
+    return render_template('main_content.html', title='Wildprice', Database=Database)
+
+@app.route('/favourites')
+def favourites():  # Страница с избранными
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).get(current_user.id)
+
+        favourites = list(map(lambda x: int(x), user.favourites.strip().split(";")[:-1])) # получаем список избранных товаров
+        if len(favourites) == 0:
+            flash('У вас нет избранных! ')
+
+        print(favourites)
+
+        return render_template('favourites_content.html', title='Wildprice', get_info=get_info, favourites=favourites)
+    return redirect(url_for('index'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -89,12 +104,24 @@ def reqister():
 def add_to_favourites(product_id):
     if current_user.is_authenticated:
         db_sess = db_session.create_session()
+
         user = db_sess.query(User).get(current_user.id)
         user.add_to_favourites(product_id)
-        print(user.favourites)
+
         db_sess.commit()
-        print(user.favourites)
     return redirect(url_for('index'))
+
+@app.route('/delete_from_favourites/<int:product_id>', methods=['GET'])
+def delete_from_favourites(product_id):
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+
+        user = db_sess.query(User).get(current_user.id)
+        user.delete_from_favourites(str(product_id))
+
+        db_sess.commit()
+
+    return redirect(url_for('favourites'))
 
 @app.route('/logout')
 @login_required

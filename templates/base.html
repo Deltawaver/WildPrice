@@ -19,7 +19,8 @@
     <nav class="navbar navbar-light" style="background-color: #BC3D96;">
         <a class="navbar-brand" href="/"><h1 style="color: white;">WildPrice</h1></a>
         {% if current_user.is_authenticated %}
-        <a class="navbar-brand" style="color: white;" href="/logout">{{ current_user.name }}</a>
+        <a class="navbar-brand" style="color: white;" href="/favourites">Избранное</a>
+        <a class="navbar-brand" style="color: white;" href="/logout">Выход</a>
         {% else %}
         <p>
             <a class="btn btn-light ml-auto" href="/register" style="margin-top: 1rem; ">Зарегистрироваться</a>
@@ -28,14 +29,11 @@
         {% endif %}
     </nav>
 </header>
-
-<body>
-
-    <main role="main" class="container">
-        {% block content %}
-        {% endblock %}
-    </main>
-</body>
+        <main role="main" class="container">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </body>
 </html>
 
 

@@ -3,16 +3,15 @@
 {% block content %}
 {% set products_db = Database("db/products.db") %}
 <div class="row">
-    {% for product_id in products_db.get_all_product_ids() %}
-    {% set product = get_info(product_id) %}
+    {% for product in products_db.get_all_products() %}
     <div class="col-md-4">
         <div class="card mb-4 shadow-sm">
-            <img src="{{ product.image_link }}" class="card-img-top" alt="{{ product.name }}">
+            <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
             <div class="card-body">
                 <h5 class="card-title">{{ product.name }}</h5>
                 <p class="card-text">ID: {{ product.id }}</p>
-                <p class="card-text">Цена: {{ product.salePriceU|int }} руб.</p>
-                <p class="card-text">Скидка: {{ ((product.priceU - product.salePriceU) / product.priceU *
+                <p class="card-text">Цена: {{ product.price|int }} руб.</p>
+                <p class="card-text">Скидка: {{ ((product.previous_price - product.price) / product.previous_price *
                     100)|round|int }}%</p>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">

@@ -9,6 +9,9 @@ class Product(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     price = Column(Float)
+    previous_price = Column(Float)
+    image_url = Column(String)
+
 
 class Database:
     def __init__(self, db_path):
@@ -17,8 +20,8 @@ class Database:
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
-    def add(self, id, name, price):
-        new_product = Product(id=id, name=name, price=price)
+    def add(self, id, name, price, latest_price, image_url):
+        new_product = Product(id=id, name=name, price=price, previous_price=latest_price, image_url=image_url)
         self.session.add(new_product)
         try:
             self.session.commit()
@@ -32,6 +35,17 @@ class Database:
             product = self.session.query(Product).filter(Product.id == id).first()
             if product:
                 product.price = new_price
+                self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            print(e)
+            return 1
+
+    def update_previous_price(self, id, new_price):
+        try:
+            product = self.session.query(Product).filter(Product.id == id).first()
+            if product:
+                product.previous_price = new_price
                 self.session.commit()
         except Exception as e:
             self.session.rollback()
@@ -54,6 +68,10 @@ class Database:
         product_ids = [product.id for product in self.session.query(Product.id).all()]
         return product_ids
 
+    def get_all_products(self):
+        products = [product for product in self.session.query(Product).all()]
+        return products
+
     def delete_product_by_id(self, id):
         try:
             # Находим продукт по ID
@@ -71,5 +89,3 @@ class Database:
 
 if __name__ == '__main__':
     db = Database("products.db")
-    db.add(4, "dsadas", 215.1)
-    print(db.get_price_from_id(4))
