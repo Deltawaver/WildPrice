@@ -103,6 +103,8 @@ def logout():
     return redirect("/")
 
 
+
+
 if __name__ == '__main__':
     db_session.global_init("db/users.db")
     app.run(debug=True)
